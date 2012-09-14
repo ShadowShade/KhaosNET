@@ -74,7 +74,7 @@ namespace Khaos.Compilers.CSharp
         /// <param name="methodSyntax">Method declaration to be converted.</param>
         /// <param name="model">Semantic model based on currently loaded assemblies will be used if not specified (this model is then cached).</param>
         /// <returns>Lambda expression</returns>
-        public static Expression<T> Compile<T>(CompilationUnitSyntax method, SemanticModel model = null)
+        public static T Compile<T>(CompilationUnitSyntax method, SemanticModel model = null)
         {
             if (model == null)
                 model = DefaultCompilation.AddSyntaxTrees(method.SyntaxTree).GetSemanticModel(method.SyntaxTree);
@@ -82,7 +82,7 @@ namespace Khaos.Compilers.CSharp
             var converter = new Lambda(model);
             converter.Visit(method);
             
-            return Expression.Lambda<T>(converter.Body, converter.Parameters.Cast<ParameterExpression>());
+            return Expression.Lambda<T>(converter.Body, converter.Parameters.Cast<ParameterExpression>()).Compile();
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Khaos.Compilers.CSharp
         /// <param name="method">Method declaration in a Roslyn supported language (currently C# or VB)</param>
         /// <param name="model">Semantic model based on currently loaded assemblies will be used if not specified (this model is then cached).</param>
         /// <returns>Lambda expression</returns>
-        public static Expression<T> Compile<T>(string method, SemanticModel model = null)
+        public static T Compile<T>(string method, SemanticModel model = null)
         {
             var root = (CompilationUnitSyntax)SyntaxTree.ParseCompilationUnit(method).GetRoot();
 
@@ -102,7 +102,7 @@ namespace Khaos.Compilers.CSharp
             var converter = new Lambda(model);
             converter.Visit(root);
 
-            return Expression.Lambda<T>(converter.Body, converter.Parameters.Cast<ParameterExpression>());
+            return Expression.Lambda<T>(converter.Body, converter.Parameters.Cast<ParameterExpression>()).Compile();
         }
 
         #region SyntaxWalker Implementation
